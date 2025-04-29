@@ -2,22 +2,12 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
-from .serializers import UserSerializer
+from .serializers import UserSerializer,StorySerializer,CategorySerializer,StoryDetailSerializer,ReviewSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework import generics
 from rest_framework import permissions
 from rest_framework import status
-
-
-
-# Define the home view
-class Home(APIView):
-  def get(self, request):
-    content = {'message': 'Welcome to the cat-collector api home route!'}
-    return Response(content)
-
-
-# import User model, UserSerializer, and RefreshToken...
+from .models import Story, Category, Review, StoryDetail 
 
 
 # User Registration
@@ -67,23 +57,26 @@ class VerifyUserView(APIView):
     except Exception as err:
       return Response({"detail": "Unexpected error occurred.", "error": str(err)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-  # class CatsIndex(generics.ListCreateAPIView):
-  #   serializer_class = StorySerializer
 
-  #   def get(self, request):
-  #     try:
-  #       queryset = Cat.objects.filter(user=request.user)
-  #       serializer = CatSerializer(queryset, many=True)
-  #       return Response(serializer.data, status=status.HTTP_200_OK)
-  #     except Exception as err:
-  #       return Response({'error': str(err)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+  class StoryIndex(generics.ListCreateAPIView):
+      permission_classes = [permissions.IsAuthenticated]
+      serializer_class = StorySerializer
+
+    def get(self, request):
+      try:
+        queryset = Story.objects.filter(user=request.user)
+        serializer = StorySerializer(queryset, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+      except Exception as err:
+        return Response({'error': str(err)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
-  #   def post(self, request, *args, **kwargs):
-  #     try:
-  #       serializer = self.serializer_class(data=request.data, context={'request': request})
-  #       if serializer.is_valid():
-  #         serializer.save(user_id=request.user.id)
-  #         return Response(serializer.data, status=status.HTTP_201_CREATED)
-  #       return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-  #     except Exception as err:
-  #       return Response({"error": str(err)})
+    def post(self, request, *args, **kwargs):
+      try:
+        serializer = self.serializer_class(data=request.data, context={'request': request})
+        if serializer.is_valid():
+          serializer.save(user_id=request.user.id)
+          return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+      except Exception as err:
+        return Response({"error": str(err)})
