@@ -21,8 +21,6 @@ class Story(models.Model):
 
 
 
-
-
 class StoryDetail(models.Model):
     content = models.TextField()
     story_id =  models.OneToOneField(Story, on_delete=models.CASCADE)
