@@ -1,0 +1,5 @@
+CREATE DATABASE story;
+
+CREATE USER story_admin WITH PASSWORD 'password';
+
+GRANT ALL PRIVILEGES ON DATABASE story TO story_admin;
