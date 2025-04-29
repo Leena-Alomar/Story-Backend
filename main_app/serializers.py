@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
-
+from .models import Story, Category, Review, StoryDetail 
 
 class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)  
@@ -19,11 +19,31 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
 
-# class CatSerializer(serializers.ModelSerializer):
-#     photo = PhotoSerializer(read_only=True)
-#     toys = ToySerializer(many=True, read_only=True)
-#     user = serializers.PrimaryKeyRelatedField(read_only=True)
+class StorySerializer(serializers.ModelSerializer):
+    review = PhotoSerializer(read_only=True)
+    user = serializers.PrimaryKeyRelatedField(read_only=True)
 
-#     class Meta:
-#         model = Cat
-#         fields = '__all__'
+    class Meta:
+        model = Story
+        fields = '__all__'
+
+
+class CategorySerializer(serializers.ModelSerializer):
+    story = StorySerializer (read_only = True)
+
+    class Meta:
+        model = Category
+        fields = '__all__'
+
+class StoryDetailSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = StoryDetail
+        fields = '__all__'
+
+
+class ReviewSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Review
+        fields = '__all__'
