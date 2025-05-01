@@ -71,13 +71,13 @@ class CategoryIndexView(APIView):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = CategorySerializer
 
-def get(self, request):
-  try:
-    queryset = Category.objects.all()
-    serializer = self.serializer_class(queryset, many=True)
-    return Response(serializer.data, status=status.HTTP_200_OK)
-  except Exception as err:
-    return Response({'error': str(err)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    def get(self, request):
+      try:
+        queryset = Category.objects.all()
+        serializer = self.serializer_class(queryset, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+      except Exception as err:
+        return Response({'error': str(err)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class CategoryDetailView(APIView):
