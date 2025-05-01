@@ -1,12 +1,11 @@
-from django.contrib import admin
-from django.urls import path, include
+from django.urls import path
 from . import views
 
 urlpatterns = [
-    path('users/signup/', viewsCreateUserView.as_view(), name='signup'),
-    path('users/login/', viewsLoginView.as_view(), name='login'),
-    path('users/token/refresh/', viewsVerifyUserView.as_view(), name='token_refresh'),
-    path('users/login/', viewsLoginView.as_view(), name='login'),
+    path('', views.Home.as_view(), name='home'),
+    path('users/signup/', views.CreateUserView.as_view(), name='signup'),
+    path('users/login/', views.LoginView.as_view(), name='login'),
+    path('users/token/refresh/', views.VerifyUserView.as_view(), name='token_refresh'),
 ]
 
 
