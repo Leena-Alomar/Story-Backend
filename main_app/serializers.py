@@ -27,8 +27,8 @@ class ReviewSerializer(serializers.ModelSerializer):
         
 class StorySerializer(serializers.ModelSerializer):
     review = ReviewSerializer(read_only=True)
-    user = serializers.PrimaryKeyRelatedField(read_only=True)
-
+    author = serializers.PrimaryKeyRelatedField(read_only=True)
+    
     class Meta:
         model = Story
         fields = '__all__'

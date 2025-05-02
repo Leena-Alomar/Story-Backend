@@ -104,73 +104,96 @@ def get(self, request,category_id):
 
 
 # Story View
-class StoryIndex(generics.ListCreateAPIView):
-  permission_classes = [permissions.IsAuthenticated]
-  serializer_class = StorySerializer
-  queryset = Story.objects.all()
+# class StoryIndex(generics.ListCreateAPIView):
+#   permission_classes = [permissions.IsAuthenticated]
+#   serializer_class = StorySerializer
+#   queryset = Story.objects.all()
 
-  def get(self, request):
-    try:
-      queryset = Story.objects.all()
-      serializer = self.serializer_class(queryset, many=True)
-      return Response(serializer.data, status=status.HTTP_200_OK)
-    except Exception as err:
-      return Response({'error': str(err)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+#   def get(self, request):
+#     try:
+#       queryset = Story.objects.all()
+#       serializer = self.serializer_class(queryset, many=True)
+#       return Response(serializer.data, status=status.HTTP_200_OK)
+#     except Exception as err:
+#       return Response({'error': str(err)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
 
-  def post(self, request):
-    serializer = self.serializer_class(data=request.data)
-    if serializer.is_valid():
-      serializer.save(author=request.user)
-      return Response(stories.data, status=status.HTTP_200_OK)
-    return Response(serializer.errors, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+#   def post(self, request):
+#     serializer = self.serializer_class(data=request.data)
+#     if serializer.is_valid():
+#       serializer.save(author=request.user)
+#       return Response(stories.data, status=status.HTTP_200_OK)
+#     return Response(serializer.errors, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
   
 
-class StoryDetail(APIView):
-  permission_classes = [permissions.IsAuthenticated]
-  serializer_class = StorySerializer
-  lookup_field = 'id'
+# class StoryDetail(APIView):
+#   permission_classes = [permissions.IsAuthenticated]
+#   serializer_class = StorySerializer
+#   lookup_field = 'id'
 
 
-  def get(self, request, story_id):
-    try:
-      story = get_object_or_404(Story, id=story_id)
-      return Response(self.serializer_class(story).data, status=status.HTTP_200_OK)
-    except Exception as err:
-        return Response({'error': str(err)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+#   def get(self, request, story_id):
+#     try:
+#       story = get_object_or_404(Story, id=story_id)
+#       return Response(self.serializer_class(story).data, status=status.HTTP_200_OK)
+#     except Exception as err:
+#         return Response({'error': str(err)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-  def put(self, request, story_id):
-    try:
-      story = get_object_or_404(Story, id=story_id)
-      serializer = self.serializer_class(story, data=request.data)
-      if serializer.is_valid():
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_200_OK)
-      return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    except Exception as err:
-        return Response({'error': str(err)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+#   def put(self, request, story_id):
+#     try:
+#       story = get_object_or_404(Story, id=story_id)
+#       serializer = self.serializer_class(story, data=request.data)
+#       if serializer.is_valid():
+#         serializer.save()
+#         return Response(serializer.data, status=status.HTTP_200_OK)
+#       return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+#     except Exception as err:
+#         return Response({'error': str(err)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-  def delete(self, request, story_id):
-    try:
-      story = get_object_or_404(Story, id=story_id)
-      story.delete()
-      return Response({'success': True}, status=status.HTTP_200_OK)
-    except Exception as err:
-      return Response({'error': str(err)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+#   def delete(self, request, story_id):
+#     try:
+#       story = get_object_or_404(Story, id=story_id)
+#       story.delete()
+#       return Response({'success': True}, status=status.HTTP_200_OK)
+#     except Exception as err:
+#       return Response({'error': str(err)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 
-  def post(self, request, story_id,category_id):
-    try:
-      category =  get_object_or_404(Category,id=category_id)
-      story =  get_object_or_404(Story,id=story_id)
-      story.category = category
-      story.save()
-      return Response({'success': True}, status=status.HTTP_200_OK)
-    except Exception as err:
-      return Response({'error': str(err)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+#   def post(self, request, story_id,category_id):
+#     try:
+#       category =  get_object_or_404(Category,id=category_id)
+#       story =  get_object_or_404(Story,id=story_id)
+#       story.category = category
+#       story.save()
+#       return Response({'success': True}, status=status.HTTP_200_OK)
+#     except Exception as err:
+#       return Response({'error': str(err)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
 
 
+
+class CategoryAddStoryDetail(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = StorySerializer
+    lookup_field = 'id'
+
+    def post(self, request, category_id):
+        try:
+            category = get_object_or_404(Category, id=category_id)
+            serializer = self.serializer_class(data=request.data)
+
+            if serializer.is_valid():
+                serializer.save(author=request.user, category=category)
+                queryset = Story.objects.filter(category=category_id)
+                story = StorySerializer(queryset, many=True)
+                return Response(story.data, status=status.HTTP_201_CREATED)
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        except IntegrityError as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
