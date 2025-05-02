@@ -174,7 +174,6 @@ def get(self, request,category_id):
     
 
 
-
 class CategoryAddStoryDetail(APIView):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = StorySerializer
@@ -187,13 +186,12 @@ class CategoryAddStoryDetail(APIView):
 
             if serializer.is_valid():
                 serializer.save(author=request.user, category=category)
+
                 queryset = Story.objects.filter(category=category_id)
-                story = StorySerializer(queryset, many=True)
-                return Response(story.data, status=status.HTTP_201_CREATED)
+                stories = StorySerializer(queryset, many=True)
+                return Response(stories.data, status=status.HTTP_201_CREATED)
             else:
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        except IntegrityError as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
