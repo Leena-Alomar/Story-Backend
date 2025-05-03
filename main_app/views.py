@@ -174,6 +174,7 @@ def get(self, request,category_id):
     
 
 
+
 class CategoryAddStoryDetail(APIView):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = StorySerializer
