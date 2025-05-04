@@ -1,4 +1,6 @@
 from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
+User=get_user_model()
 from rest_framework import serializers
 from .models import Story, Category, Review
 
@@ -27,11 +29,16 @@ class ReviewSerializer(serializers.ModelSerializer):
         
 class StorySerializer(serializers.ModelSerializer):
     review = ReviewSerializer(read_only=True)
-    author = serializers.PrimaryKeyRelatedField(read_only=True)
+    author = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
     
     class Meta:
         model = Story
         fields = '__all__'
+        
+    def create(self, validated_data):
+        request = self.context.get('request')  # Get the request context
+        validated_data['author'] = request.user  # Assign the logged-in user as the author
+        return super().create(validated_data)
 
 
 class CategorySerializer(serializers.ModelSerializer):

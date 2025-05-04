@@ -106,24 +106,29 @@ def get(self, request,category_id):
 class CategoryAddStoryDetail(APIView):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = StorySerializer
-    lookup_field = 'id'
-
     def post(self, request, category_id):
+        print(request.user)
         try:
             category = get_object_or_404(Category, id=category_id)
-            serializer = self.serializer_class(data=request.data)
-            print(serializer)
+            # Pass request to the serializer's context to access the logged-in user
+            serializer = self.serializer_class(data=request.data, context={'request': request})
             if serializer.is_valid():
-                serializer.save(author=request.user, category=category)
-
+                # Category is set automatically, no need to pass 'author'
+                serializer.save(category=category, author=request.user)
                 queryset = Story.objects.filter(category=category_id)
                 stories = StorySerializer(queryset, many=True)
                 return Response(stories.data, status=status.HTTP_201_CREATED)
             else:
+                print("Validation errors:", serializer.errors)  # Print validation errors
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+
+
+
 
 
 
