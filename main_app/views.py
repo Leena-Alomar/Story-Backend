@@ -66,7 +66,6 @@ class VerifyUserView(APIView):
 
 
 #Category Views
-
 class CategoryIndexView(APIView):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = CategorySerializer
@@ -101,6 +100,32 @@ def get(self, request,category_id):
         return Response({'success': True}, status=status.HTTP_200_OK)
     except Exception as err:
         return Response({'error': str(err)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+class CategoryAddStoryDetail(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = StorySerializer
+    lookup_field = 'id'
+
+    def post(self, request, category_id):
+        try:
+            category = get_object_or_404(Category, id=category_id)
+            serializer = self.serializer_class(data=request.data)
+            print(serializer)
+            if serializer.is_valid():
+                serializer.save(author=request.user, category=category)
+
+                queryset = Story.objects.filter(category=category_id)
+                stories = StorySerializer(queryset, many=True)
+                return Response(stories.data, status=status.HTTP_201_CREATED)
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 
 
 # Story View
@@ -173,26 +198,3 @@ def get(self, request,category_id):
 #       return Response({'error': str(err)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
 
-
-
-class CategoryAddStoryDetail(APIView):
-    permission_classes = [permissions.IsAuthenticated]
-    serializer_class = StorySerializer
-    lookup_field = 'id'
-
-    def post(self, request, category_id):
-        try:
-            category = get_object_or_404(Category, id=category_id)
-            serializer = self.serializer_class(data=request.data)
-
-            if serializer.is_valid():
-                serializer.save(author=request.user, category=category)
-
-                queryset = Story.objects.filter(category=category_id)
-                stories = StorySerializer(queryset, many=True)
-                return Response(stories.data, status=status.HTTP_201_CREATED)
-            else:
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-        except Exception as e:
-            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
