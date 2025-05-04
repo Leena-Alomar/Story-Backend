@@ -29,16 +29,17 @@ class ReviewSerializer(serializers.ModelSerializer):
         
 class StorySerializer(serializers.ModelSerializer):
     review = ReviewSerializer(read_only=True)
-    author = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
-    
+    author = serializers.PrimaryKeyRelatedField(read_only=True)  # <- ✅ THIS IS CRUCIAL
+
     class Meta:
         model = Story
         fields = '__all__'
-        
+
     def create(self, validated_data):
-        request = self.context.get('request')  # Get the request context
-        validated_data['author'] = request.user  # Assign the logged-in user as the author
+        request = self.context.get('request')
+        validated_data['author'] = request.user
         return super().create(validated_data)
+
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -47,5 +48,4 @@ class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         fields = '__all__'
-
 
