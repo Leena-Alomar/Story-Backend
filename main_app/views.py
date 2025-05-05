@@ -9,7 +9,10 @@ from rest_framework import permissions
 from rest_framework import status
 from .models import Story, Category, Review
 from django.shortcuts import get_object_or_404
-
+from django.views.decorators.csrf import csrf_exempt
+from django.http import HttpResponse, JsonResponse
+import openai
+import json
 
 # Define the home view
 class Home(APIView):
@@ -261,4 +264,36 @@ class ReviewDetail(APIView):
         review.delete()
         return Response({'success': True}, status=status.HTTP_200_OK)
     except Exception as err:
+        print(err)
         return Response({'error': str(err)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+
+
+
+openai.api_key = 'your-api-key-here'
+
+@csrf_exempt
+def text_to_speech(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        text = data.get('text', '')
+
+        if not text:
+            return JsonResponse({'error': 'No text provided'}, status=400)
+
+        try:
+            response = openai.audio.speech.create(
+                model="tts-1",  
+                voice="nova",  
+                input=text
+            )
+
+            audio_data = response.content
+            return HttpResponse(audio_data, content_type="audio/mpeg")
+
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
+    return JsonResponse({'error': 'Invalid request method'}, status=405)

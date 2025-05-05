@@ -1,5 +1,9 @@
 from django.urls import path
 from . import views
+from django.urls import path
+from .views import text_to_speech
+
+
 
 
 urlpatterns = [
@@ -14,6 +18,7 @@ urlpatterns = [
     path('story/<int:story_id>/review/new/', views.StoryAddReviewyDetail.as_view(), name='review-detail'),
     path('review/', views.ReviewView.as_view(), name='review-index'), 
     path('review/<int:review_id>/', views.ReviewDetail.as_view(), name='review-detail'),
+    path('api/text-to-speech/', text_to_speech),
 ]
 
 
