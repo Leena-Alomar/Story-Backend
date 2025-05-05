@@ -153,12 +153,12 @@ class StoryDetail(APIView):
     except Exception as err:
         return Response({'error': str(err)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-
-    
   def put(self, request, story_id):
+    print(request)
+    print(request.data)
     try:
         story = get_object_or_404(Story, id=story_id)
-        serializer = self.serializer_class(story, data=request.data)
+        serializer = self.serializer_class(story, data=request.data, context={'request': request})
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)

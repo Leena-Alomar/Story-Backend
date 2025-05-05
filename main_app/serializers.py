@@ -34,12 +34,21 @@ class StorySerializer(serializers.ModelSerializer):
         model = Story
         fields = '__all__'
 
+    def update(self, instance, validated_data):
+        request = self.context.get('request')
+        if request and request.user:
+            validated_data['author'] = request.user
+        return super().update(instance, validated_data)
+
     def create(self, validated_data):
         request = self.context.get('request')
         validated_data['author'] = request.user
         return super().create(validated_data)
 
-
+    # def put(self, validated_data):
+    #     request = self.context.get('request')
+    #     validated_data['author'] = request.user
+    #     return super().create(validated_data)
 
 class CategorySerializer(serializers.ModelSerializer):
     story = StorySerializer (read_only = True)
