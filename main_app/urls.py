@@ -10,6 +10,9 @@ urlpatterns = [
     path('users/token/refresh/', views.VerifyUserView.as_view(), name='token_refresh'),
     path('category/<int:category_id>/story/new/', views.CategoryAddStoryDetail.as_view(), name='story-detail'),
     path('story/', views.StoryView.as_view(), name='story-index'),
+    # path('story/<str:id>/', views.StoryView.as_view(), name='story-detail'),
+    path('story/<int:story_id>/', views.StoryDetail.as_view(), name='story-detail'),
+    
 ]
 
 

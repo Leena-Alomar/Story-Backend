@@ -139,3 +139,37 @@ class StoryView(APIView):
       return Response({'error': str(err)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+
+class StoryDetail(APIView):
+  permission_classes = [permissions.IsAuthenticated]
+  serializer_class = StorySerializer
+  lookup_field = 'id'
+  
+  def get(self, request, story_id):
+    try:
+      story = get_object_or_404(Story, id=story_id)
+      return Response(self.serializer_class(toy).data, status=status.HTTP_200_OK)
+    except Exception as err:
+        return Response({'error': str(err)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+    
+  def put(self, request, story_id):
+    try:
+        story = get_object_or_404(Story, id=story_id)
+        serializer = self.serializer_class(story, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as err:
+        return Response({'error': str(err)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+  def delete(self, request, story_id):
+    try:
+        story = get_object_or_404(Story, id=story_id)
+        story.delete()
+        return Response({'success': True}, status=status.HTTP_200_OK)
+    except Exception as err:
+        return Response({'error': str(err)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
