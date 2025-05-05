@@ -148,7 +148,7 @@ class StoryDetail(APIView):
   def get(self, request, story_id):
     try:
       story = get_object_or_404(Story, id=story_id)
-      return Response(self.serializer_class(toy).data, status=status.HTTP_200_OK)
+      return Response(self.serializer_class(story).data, status=status.HTTP_200_OK)
     except Exception as err:
         return Response({'error': str(err)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
