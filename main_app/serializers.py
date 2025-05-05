@@ -20,16 +20,15 @@ class UserSerializer(serializers.ModelSerializer):
       
         return user
 
-
 class ReviewSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Review
         fields = '__all__'
-        
+
 class StorySerializer(serializers.ModelSerializer):
     review = ReviewSerializer(read_only=True)
-    author = serializers.PrimaryKeyRelatedField(read_only=True)  # <- ✅ THIS IS CRUCIAL
+    author = serializers.PrimaryKeyRelatedField(read_only=True) 
 
     class Meta:
         model = Story

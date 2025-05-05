@@ -10,6 +10,7 @@ from rest_framework import status
 from .models import Story, Category, Review
 from django.shortcuts import get_object_or_404
 
+
 # Define the home view
 class Home(APIView):
   def get(self, request):
@@ -170,6 +171,79 @@ class StoryDetail(APIView):
     try:
         story = get_object_or_404(Story, id=story_id)
         story.delete()
+        return Response({'success': True}, status=status.HTTP_200_OK)
+    except Exception as err:
+        return Response({'error': str(err)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+class StoryAddReviewyDetail(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = ReviewSerializer
+
+
+    def post(self, request, Story_id):
+        try:
+            story = get_object_or_404(Story, id=story_id)
+            serializer = self.serializer_class(data=request.data, context={'request': request})
+            if serializer.is_valid():
+                serializer.save(story=story, author=request.user)
+                queryset = Review.objects.filter(story=story_id)
+                reviews = ReviewSerializer(queryset, many=True)
+                return Response(stories.data, status=status.HTTP_201_CREATED)
+            else:
+                print("Validation errors:", serializer.errors) 
+                print(request.author)
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+class ReviewView(APIView):
+  permission_classes = [permissions.IsAuthenticated]
+  serializer_class = ReviewSerializer
+
+  def get(self, request):
+    try:
+      queryset = Review.objects.all()
+      serializer = self.serializer_class(queryset, many=True)
+      return Response(serializer.data, status=status.HTTP_200_OK)
+    except Exception as err:
+      return Response({'error': str(err)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+class ReviewDetail(APIView):
+  permission_classes = [permissions.IsAuthenticated]
+  serializer_class = ReviewSerializer
+  lookup_field = 'id'
+  
+  def get(self, request, review_id):
+    try:
+      review = get_object_or_404(Review, id=review_id)
+      return Response(self.serializer_class(review).data, status=status.HTTP_200_OK)
+    except Exception as err:
+        return Response({'error': str(err)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+    
+  def put(self, request, review_id):
+    try:
+        review = get_object_or_404(Review, id=review_id)
+        serializer = self.serializer_class(review, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as err:
+        return Response({'error': str(err)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+  def delete(self, request, review_id):
+    try:
+        review = get_object_or_404(Review, id=review_id)
+        review.delete()
         return Response({'success': True}, status=status.HTTP_200_OK)
     except Exception as err:
         return Response({'error': str(err)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
