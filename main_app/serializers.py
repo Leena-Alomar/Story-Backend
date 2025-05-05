@@ -21,10 +21,10 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
 class ReviewSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Review
-        fields = '__all__'
+        fields = ['id', 'story_id', 'user_review', 'content']
+        read_only_fields = ['user_review']
 
 class StorySerializer(serializers.ModelSerializer):
     review = ReviewSerializer(read_only=True)

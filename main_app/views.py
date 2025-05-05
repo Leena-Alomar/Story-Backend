@@ -181,21 +181,36 @@ class StoryAddReviewyDetail(APIView):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = ReviewSerializer
 
-
-    def post(self, request, Story_id):
+    def get(self, request, story_id):
         try:
+            # Check that the story exists
             story = get_object_or_404(Story, id=story_id)
+
+            # Get all reviews for the story
+            reviews = Review.objects.filter(story_id=story_id)
+            serializer = self.serializer_class(reviews, many=True)
+
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+    def post(self, request, story_id):
+        try:
+            print(request.data)
+            # story = get_object_or_404(Story, id=story_id)
             serializer = self.serializer_class(data=request.data, context={'request': request})
             if serializer.is_valid():
-                serializer.save(story=story, author=request.user)
-                queryset = Review.objects.filter(story=story_id)
+                serializer.save(user_review=request.user)
+                queryset = Review.objects.filter(story_id=story_id)
                 reviews = ReviewSerializer(queryset, many=True)
-                return Response(stories.data, status=status.HTTP_201_CREATED)
+                return Response(reviews.data, status=status.HTTP_201_CREATED)
             else:
                 print("Validation errors:", serializer.errors) 
                 print(request.author)
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
+            print(e)
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
