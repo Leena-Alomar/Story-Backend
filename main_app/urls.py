@@ -19,8 +19,11 @@ urlpatterns = [
     path('review/', views.ReviewView.as_view(), name='review-index'), 
     path('review/<int:review_id>/', views.ReviewDetail.as_view(), name='review-detail'),
     path('api/text-to-speech/', text_to_speech),
+    path('story/<int:story_id>/like/new/', views.StoryAddLikeDetail.as_view(), name='like-detail'),
+    path('like/', views.LikeView.as_view(), name='like-index'), 
+    path('category/<int:category_id>/Author/new/', views.CategoryAddAuthorsDetail.as_view(), name='author-detail'),
+    path('author/', views.AuthorView.as_view(), name='author-index'),
 ]
-
 
 
     

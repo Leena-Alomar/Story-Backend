@@ -2,12 +2,12 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
-from .serializers import UserSerializer,StorySerializer,CategorySerializer,ReviewSerializer
+from .serializers import UserSerializer,StorySerializer,CategorySerializer,ReviewSerializer ,LikeSerializer ,AuthorSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework import generics
 from rest_framework import permissions
 from rest_framework import status
-from .models import Story, Category, Review
+from .models import Story, Category, Review ,Like
 from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse, JsonResponse
@@ -186,10 +186,8 @@ class StoryAddReviewyDetail(APIView):
 
     def get(self, request, story_id):
         try:
-            # Check that the story exists
+  
             story = get_object_or_404(Story, id=story_id)
-
-            # Get all reviews for the story
             reviews = Review.objects.filter(story_id=story_id)
             serializer = self.serializer_class(reviews, many=True)
 
@@ -201,7 +199,6 @@ class StoryAddReviewyDetail(APIView):
     def post(self, request, story_id):
         try:
             print(request.data)
-            # story = get_object_or_404(Story, id=story_id)
             serializer = self.serializer_class(data=request.data, context={'request': request})
             if serializer.is_valid():
                 serializer.save(user_review=request.user)
@@ -267,6 +264,88 @@ class ReviewDetail(APIView):
         print(err)
         return Response({'error': str(err)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
+class StoryAddLikeDetail(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = LikeSerializer
+
+    def get(self, request, story_id):
+        try:
+  
+            story = get_object_or_404(Story, id=story_id)
+            likes = Like.objects.filter(story_id=story_id)
+            serializer = self.serializer_class(likes, many=True)
+
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+    def post(self, request, story_id):
+        try:
+            print(request.data)
+            serializer = self.serializer_class(data=request.data, context={'request': request})
+            if serializer.is_valid():
+                serializer.save(user_fav=request.user ,author_liked=request.user)
+                queryset = Review.objects.filter(story_id=story_id)
+                likes = LikeSerializer(queryset, many=True)
+                return Response(likes.data, status=status.HTTP_201_CREATED)
+            else:
+                print("Validation errors:", serializer.errors) 
+                print(request.author)
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            print(e)
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class LikeView(APIView):
+  permission_classes = [permissions.IsAuthenticated]
+  serializer_class = LikeSerializer
+
+  def get(self, request):
+    try:
+      queryset = Like.objects.all()
+      serializer = self.serializer_class(queryset, many=True)
+      return Response(serializer.data, status=status.HTTP_200_OK)
+    except Exception as err:
+      return Response({'error': str(err)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+class CategoryAddAuthorsDetail(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = AuthorSerializer
+
+
+    def post(self, request, category_id):
+        try:
+            category = get_object_or_404(Category, id=category_id)
+            serializer = self.serializer_class(data=request.data, context={'request': request})
+            if serializer.is_valid():
+                serializer.save(category=category, author=request.user)
+                queryset = Author.objects.filter(category=category_id)
+                authors = AuthorSerializer(queryset, many=True)
+                return Response(authors.data, status=status.HTTP_201_CREATED)
+            else:
+                print("Validation errors:", serializer.errors) 
+                print(request.author)
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class AuthorView(APIView):
+  permission_classes = [permissions.IsAuthenticated]
+  serializer_class = AuthorSerializer
+
+  def get(self, request):
+    try:
+      queryset = Author.objects.all()
+      serializer = self.serializer_class(queryset, many=True)
+      return Response(serializer.data, status=status.HTTP_200_OK)
+    except Exception as err:
+      return Response({'error': str(err)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 

@@ -16,11 +16,12 @@ class Story(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     description=models.TextField(max_length=250)
     content = models.TextField()
+    photo_url = models.CharField(max_length=250)
 
     def __str__(self):
         return self.title
 
-  
+
 
 
 class Review(models.Model):
@@ -30,3 +31,23 @@ class Review(models.Model):
 
     def __str__(self):
         return self.content       
+
+
+class Like(models.Model):
+    story_liked = models.ForeignKey(Story, on_delete=models.CASCADE)
+    user_fav = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_likes')  
+    author_liked = models.ForeignKey(User, on_delete=models.CASCADE, related_name='author_likes')  
+
+    def __str__(self):
+         return self.user_fav  
+
+
+class Author(models.Model):
+    author_name = models.ForeignKey(User, on_delete=models.CASCADE , related_name='author_name')
+    story_posted = models.ForeignKey(Story, on_delete=models.CASCADE , related_name='story_has')
+    likes = models.ForeignKey(Like, on_delete=models.CASCADE , related_name='liked_story') 
+    profile_pic = models.CharField(max_length=250)
+
+
+    def __str__(self):
+         return self.author_name 

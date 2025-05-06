@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import get_user_model
 User=get_user_model()
 from rest_framework import serializers
-from .models import Story, Category, Review
+from .models import Story, Category, Review , Like , Author
 
 class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)  
@@ -20,15 +20,21 @@ class UserSerializer(serializers.ModelSerializer):
       
         return user
 
+
+
 class ReviewSerializer(serializers.ModelSerializer):
+    user_review = UserSerializer(read_only=True)
     class Meta:
         model = Review
         fields = ['id', 'story_id', 'user_review', 'content']
         read_only_fields = ['user_review']
 
+
+
+
 class StorySerializer(serializers.ModelSerializer):
     review = ReviewSerializer(read_only=True)
-    author = serializers.PrimaryKeyRelatedField(read_only=True) 
+    author = UserSerializer(read_only=True)
 
     class Meta:
         model = Story
@@ -44,11 +50,8 @@ class StorySerializer(serializers.ModelSerializer):
         request = self.context.get('request')
         validated_data['author'] = request.user
         return super().create(validated_data)
+    
 
-    # def put(self, validated_data):
-    #     request = self.context.get('request')
-    #     validated_data['author'] = request.user
-    #     return super().create(validated_data)
 
 class CategorySerializer(serializers.ModelSerializer):
     story = StorySerializer (read_only = True)
@@ -57,3 +60,26 @@ class CategorySerializer(serializers.ModelSerializer):
         model = Category
         fields = '__all__'
 
+
+
+class LikeSerializer(serializers.ModelSerializer):
+    story_liked = StorySerializer(read_only=True)
+    author_liked = UserSerializer(read_only=True)
+    user_fav  = UserSerializer(read_only=True)
+
+
+    class Meta:
+        model = Like
+        fields = '__all__'
+
+
+
+class AuthorSerializer(serializers.ModelSerializer):
+    story_posted = StorySerializer(read_only=True)
+    author_name = UserSerializer(read_only=True)
+    likes  = LikeSerializer(read_only=True)
+
+    
+    class Meta:
+        model = Author
+        fields = '__all__'
