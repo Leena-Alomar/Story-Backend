@@ -13,6 +13,12 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse, JsonResponse
 import openai
 import json
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.conf import settings
+import os
+from django.core.files.base import ContentFile
+from django.core.files.storage import default_storage
 
 # Define the home view
 class Home(APIView):
@@ -351,28 +357,26 @@ class AuthorView(APIView):
 
 
 
-openai.api_key = 'your-api-key-here'
+
 
 @csrf_exempt
 def text_to_speech(request):
     if request.method == 'POST':
+        import json
         data = json.loads(request.body)
-        text = data.get('text', '')
+        text = data.get('text')
 
-        if not text:
-            return JsonResponse({'error': 'No text provided'}, status=400)
+        openai.api_key = settings.OPENAI_API_KEY
 
         try:
             response = openai.audio.speech.create(
-                model="tts-1",  
-                voice="nova",  
-                input=text
+                model="tts-1",
+                voice="alloy",  # You can also use "echo", "fable", etc.
+                input=text,
             )
-
             audio_data = response.content
-            return HttpResponse(audio_data, content_type="audio/mpeg")
-
+            file_path = default_storage.save("output.mp3", ContentFile(audio_data))
+            return JsonResponse({'audio_url': f'/media/{file_path}'})
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
 
-    return JsonResponse({'error': 'Invalid request method'}, status=405)
