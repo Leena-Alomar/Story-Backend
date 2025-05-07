@@ -20,12 +20,16 @@ import os
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 
+
+
 # Define the home view
 class Home(APIView):
   def get(self, request):
     content = {'message': 'Welcome to the cat-collector api home route!'}
     return Response(content)
-    
+
+
+
 # User Registration
 class CreateUserView(generics.CreateAPIView):
   queryset = User.objects.all()
@@ -42,6 +46,7 @@ class CreateUserView(generics.CreateAPIView):
       return Response({ 'error': str(err)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+
 class LoginView(APIView):
 
   def post(self, request):
@@ -56,6 +61,8 @@ class LoginView(APIView):
       return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
     except Exception as err:
       return Response({'error': str(err)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 
 
 # User Verification
@@ -110,6 +117,8 @@ def get(self, request,category_id):
         return Response({'success': True}, status=status.HTTP_200_OK)
     except Exception as err:
         return Response({'error': str(err)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 
 
 
@@ -352,10 +361,6 @@ class AuthorView(APIView):
       return Response(serializer.data, status=status.HTTP_200_OK)
     except Exception as err:
       return Response({'error': str(err)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-
-
 
 
 
