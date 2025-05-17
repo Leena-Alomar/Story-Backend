@@ -45,12 +45,14 @@ Ideal for aspiring writers, casual readers, and story lovers.
 
 ## 🛠 Tech Stack
 
-- **Language**: Django
-- **Framework**: Django
-- **Database**: MongoDB / PostgreSQL (update based on actual)
-- **Authentication**: JWT / Sessions (if used)
-- **Containerization**: Docker (optional)
-- **Other**: REST API
+## Tech Stack
+- Python 3.11
+- Django 5
+- Django REST Framework
+- Simple JWT
+- PostgreSQL
+- Pillow (for image handling)
+- django-cors-headers
 
 ---
 
